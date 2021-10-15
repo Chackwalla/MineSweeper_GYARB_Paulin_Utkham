@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<script type="application/json" src="https://raw.githubusercontent.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mineu Sweeeepuuurrr</title>
+</head>
+<body>
+    
+</body>
+
+<script>
+    
+</script>
+
+</html>
+
+
+
+<!---  Sören's 
+<body> 
+    <div id="allWrap">
+        <div id="playfield" class="playSize"></div>
+        <div class="side">
+            <h2 class="heading">Mines left</h2>
+            <div id="minesLeft" >-</div>
+
+            <h2 class="heading">Settings</h2>
+
+            <div>Play Dimension [x, y]</div>
+            <input id="xBox" class="inputBox" type="number">
+            <input id="yBox" class="inputBox" type="number">
+
+            <div>Mine Count</div>
+            <input id="mineBox" class="inputBox" type="number">
+            <button onclick="buildNewGame()">Build Game</button>
+
+            <div id="endCell"></div>
+        </div>
+    </div>
+	
+</body>
+
+<script>
+
+    /* VARIABLES TO CHANGE*/
+
+    // dimensions of the playfield
+    let playDim = {
+        x:25
+        ,y:15
+    }
+    let mineCount = 50;
+
+    let cellSize = 60;
+    // "#a2dcf2"
+    let clickedColor = "#eac7e6";
+
+    /* VARIABLES TO CHANGE*/
+    let cellCount;
+
+    // helper to iterate over rows and cells
+    let tempRow;
+    let tempCell;
+
+    // easy access to CSS object
+    let cellArray;
+    // tracking of progress
+    let isCellClicked;
+    let isClickedCount;
+    // array containing the coordinates of all non Mine fields in {y:.., x:..} format
+    let notMines;
+    // array containing the coordinates of all Mine fields in {y:.., x:..} format
+    let yesMines;
+    let sheet = document.styleSheets[0];
+    let CSSplayfield = document.getElementById('playfield');
+    // start the game for the first time
+    buildGame();
+    
+    function buildNewGame(){
+        
+        // apply new values
+        playDim = {
+            x: parseInt(document.getElementById('xBox').value)
+            ,y: parseInt(document.getElementById('yBox').value)
+        }
+        mineCount = parseInt(document.getElementById('mineBox').value);
+
+        // invalid input
+        if (playDim.x <= 0 || playDim.y <= 0 || mineCount <= 0) {
+            endCell.innerHTML = "Only numbers greater then 0 allowed";
+            return;
+        }
+        endCell.innerHTML = "";
+
+        // delete created rules
+        sheet.deleteRule(0);
+        sheet.deleteRule(0);
+        sheet.deleteRule(0);
+        // delete all rows&cells
+        yeetChildren(CSSplayfield);
+
+
+
+        buildGame();
+    }
+
+    function buildGame(){
+        cellCount = playDim.x * playDim.y;
+        cellArray = [];
+        isCellClicked = []
+        isClickedCount = 0
+        notMines = [];
+        yesMines = [];
+
+        document.getElementById('xBox').value = playDim.x;
+        document.getElementById('yBox').value = playDim.y;
+
+        // make a new class for playfield size, row height and cell width
+        sheet.insertRule("div.playSize { width:" + playDim.x * cellSize + "px; height:" + playDim.y * cellSize + "px;}", 0);
+        sheet.insertRule("div.rowConfig { height:" + 100/playDim.y + "%;}", 0);
+        sheet.insertRule("div.cellConfig { width:" + 100/playDim.x + "%; font: " + cellSize/2 + "px Arial;}", 0);
+        
+        // every Row
+        for (let y = 0; y < playDim.y; y++) {
+            
+            // new empty Row
+            cellArray[y] = [];
+            isCellClicked[y] = [];
+            // adds new div in the playfield and gives it the neccessary attributes
+            tempRow = CSSplayfield.appendChild(document.createElement('div'));
+            tempRow.className = "row rowConfig";
+
+            // every cell
+            for (let x = 0; x < playDim.x; x++) {
+                // adds new div in the row and gives it the neccessary attributes
+                tempCell = tempRow.appendChild(document.createElement('div'));
+                tempCell.className = "cell cellConfig button";
+                tempCell.onclick = function() {onCellClick({y:y, x:x})};
+                tempCell.oncontextmenu = function() {return cycleState({y:y, x:x})};
+
+                // fill arrays
+                cellArray[y][x] = tempCell;
+                isCellClicked[y][x] = false;
+                notMines.push({y:y, x:x});
+            }
+
+        }
+        
+        // easy access
+        let minesLeftCell = document.getElementById("minesLeft");
+        let endCell = document.getElementById("end");
+
+        // generate Mines
+        generateMineArray()
+
+        // starts the Mine counter
+        minesLeftCell.innerHTML = yesMines.length;
+    }
+
+    
+
+
+
+    
+    function yeetChildren(CSS){
+        while (CSS.firstChild) {
+            CSS.removeChild(CSS.lastChild);
+        }
+    }
+
+
+
+    function cycleState(cell){
+        let CSScell = cellArray[cell.y][cell.x];
+        // cycles through right click states
+        switch (CSScell.innerHTML) {
+            case "":
+                minesLeft.innerHTML--;
+                CSScell.innerHTML = "!";
+                CSScell.onclick = "";
+                break;
+            case "!":
+                minesLeft.innerHTML++;
+                CSScell.innerHTML = "?";
+                CSScell.onclick = "";
+                break;
+            case "?":
+                CSScell.innerHTML = "";
+                CSScell.onclick = function() {onCellClick({y:cell.y, x:cell.x})};
+                break;
+        }
+        return false;
+    }
+
+
+
+    function onCellClick(cell){
+        // easy access
+        let CSScell = cellArray[cell.y][cell.x];
+        let toClickCells = [];
+        isCellClicked[cell.y][cell.x] = true;
+        
+        // remove button properties
+        CSScell.onclick = "";
+        CSScell.oncontextmenu = () => {return false};
+        CSScell.classList.remove("button");
+        
+        // if clicked a mine
+        if(isMine(cell)) {
+            loose();
+        } else {
+            // counts non-mine clicks
+            isClickedCount++;
+            CSScell.style.backgroundColor = clickedColor;
+
+            // check surrounding for mines amount
+            let mineSurrCount = countMines(cell);
+            if (mineSurrCount === 0){
+                toClickCells = getSurroundingCells(cell);
+                // loop to click all surrounding cells (and more)
+                while (toClickCells.length > 0){
+                    toClickCells = toClickCells.concat(clickCascade(toClickCells.pop()));
+                }
+            } else {
+                // show number of mines
+                CSScell.innerHTML = countMines(cell);
+            }
+            // win if everything except mines is clicked
+            if ((isClickedCount + mineCount) === cellCount) {
+                win();
+            }
+        };
+
+    }
+
+    // used to click a cell and return surrounding cells that need clicking
+    function clickCascade(cell){
+        let CSScell = cellArray[cell.y][cell.x];
+        if (isCellClicked[cell.y][cell.x]) {
+            return [];
+        }
+        isCellClicked[cell.y][cell.x] = true;
+        isClickedCount++;
+        CSScell.onclick = "";
+        CSScell.oncontextmenu = () => {return false};
+        CSScell.classList.remove("button");
+        CSScell.style.backgroundColor = clickedColor;
+        let mineCount = countMines(cell);
+        
+        if (mineCount === 0){
+            CSScell.innerHTML = "";
+            return getSurroundingCells(cell);
+            
+        } else {
+            CSScell.innerHTML = countMines(cell);
+            return [];
+        }
+        
+    }
+
+
+
+
+
+    function countMines(cell){
+        let surrounding = getSurroundingCells(cell);
+        let mineCount = 0;
+        // iterate over all mines
+        yesMines.forEach(mineCell => {
+            surrounding.forEach(surrCell => {
+                if(mineCell.y === surrCell.y && mineCell.x === surrCell.x){
+                    mineCount++;
+                    return true;
+                }
+            });
+            
+        });
+        return mineCount;
+    }
+
+
+
+    function generateMineArray(){
+        // too many mines
+        if (mineCount >= notMines.length) {
+            mineCount = notMines.length - 1;
+        }
+        document.getElementById('mineBox').value = mineCount;
+        let randomID;
+        let rendomEntry;
+        // get a random field for every mine
+        for (let index = 0; index < mineCount; index++) {
+            randomID = Math.floor(Math.random() * notMines.length);
+            rendomEntry = notMines.splice(randomID, 1)[0];
+
+            yesMines.push(rendomEntry);
+
+            // temp color
+            //cellArray[rendomEntry.y][rendomEntry.x].style.backgroundColor = "red";
+            
+        }
+
+
+    }
+
+
+    function getSurroundingCells(cell) {
+        let surrounding = [];
+        // up left
+        if (cell.y != 0 && cell.x != 0 ) {
+            surrounding.push({y:cell.y-1, x:cell.x-1});
+        }
+        // up
+        if (cell.y != 0) {
+            surrounding.push({y:cell.y-1, x:cell.x});
+        }
+        // up right
+        if (cell.y != 0 && cell.x != playDim.x-1) {
+            surrounding.push({y:cell.y-1, x:cell.x+1});
+        }
+        // left
+        if (cell.x != 0) {
+            surrounding.push({y:cell.y, x:cell.x-1});
+        }
+        // right
+        if (cell.x != playDim.x-1) {
+            surrounding.push({y:cell.y, x:cell.x+1});
+        }
+        // bottom left
+        if (cell.y != playDim.y-1 && cell.x != 0 ) {
+            surrounding.push({y:cell.y+1, x:cell.x-1});
+        }
+        // bottom
+        if (cell.y != playDim.y-1 ) {
+            surrounding.push({y:cell.y+1, x:cell.x});
+        }
+        // bottom right
+        if (cell.y != playDim.y-1 && cell.x != playDim.x-1 ) {
+            surrounding.push({y:cell.y+1, x:cell.x+1});
+        }
+        return surrounding;
+    }
+
+
+    function isMine(cell){
+        let isMine = false;
+        yesMines.forEach(mine => {
+            if (cell.x === mine.x && cell.y === mine.y) {
+                // mine found
+                isMine = true;
+                return true;
+            }
+        });
+        return isMine;
+    }
+
+
+
+
+
+    function win(){
+        stopInput();
+        showMines();
+        endCell.innerHTML = "WIN!";
+    }
+
+    function loose(){
+        stopInput();
+        showMines();
+        endCell.innerHTML = "LOOSE!<br>" + endCell.innerHTML;
+    }
+
+    function stopInput(){
+        cellArray.forEach(row => {
+            row.forEach(cell => {
+                cell.onclick = "";
+                cell.oncontextmenu = () => {return false};
+                cell.classList.remove("button");
+            });
+        });
+    }
+
+    function showMines(){
+        let correctMines = 0;
+        yesMines.forEach(mine => {
+            cellArray[mine.y][mine.x].style.backgroundColor = "red";
+            if(cellArray[mine.y][mine.x].innerHTML === "!"){
+                // count mines marked with a !
+                correctMines++;
+            }
+        });
+        endCell.innerHTML = "Found " + correctMines + " Mines!"
+    }
+
+    
+
+</script>
+--->
