@@ -1,1 +1,145 @@
-/* No CSS *//*# sourceMappingURL=style.css.map */
+@charset "UTF-8";
+div {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+#allWrap {
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+}
+
+#playfield {
+  border: 2px solid black;
+  float: left;
+}
+
+.row {
+  width: 100%;
+}
+
+.cell {
+  height: 100%;
+  border: 1px solid black;
+  float: left;
+  background-color: blueviolet;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  /* align horizontal */
+  /*        align-items: center; /* align vertical */
+}
+
+.button {
+  -webkit-box-shadow: -1px -1px 7px rgba(0, 0, 0, 0.5) inset;
+          box-shadow: -1px -1px 7px rgba(0, 0, 0, 0.5) inset;
+  cursor: pointer;
+}
+
+.button:active {
+  background-color: coral;
+}
+
+.side {
+  width: auto;
+  height: -webkit-max-content;
+  height: -moz-max-content;
+  height: max-content;
+  position: relative;
+  left: 30px;
+  top: 30px;
+  float: left;
+}
+
+/* Sören's
+<style>
+
+    div {
+        box-sizing: border-box;
+    }
+
+    #allWrap {
+        width: max-content;
+    }
+    
+    #playfield {
+        border: 2px solid black;
+        float: left;
+    }
+
+    div.row {
+        width:100%;
+    }
+
+    div.cell {
+        height:100%;
+
+        border: 1px solid black;
+        float: left;
+        
+        background-color: #82f0ff;
+
+        display: flex;
+        justify-content: center; /* align horizontal */
+/*        align-items: center; /* align vertical */
+/*    }
+
+    div.button {
+        box-shadow: -1px -1px 7px rgba(0, 0, 0, 0.5) inset;
+        cursor: pointer;
+    }
+    div.button:active {
+        background-color: #69c5d1;
+    }
+
+
+
+
+    div.side {
+        width: auto;
+        height: max-content;
+        position: relative;
+        left: 30px;
+        top: 30px;
+        float: left;
+    }
+    #minesLeft {
+        width: fit-content;
+        height: 50px;
+        border: 1px solid black;
+        font: 400 40px Arial;
+        padding: 1px 4px 0 4px;
+        display: flex;
+        align-items: center; /* align vertical */
+/*    }
+
+    input.inputBox {
+        margin: 10px 0px;
+        height: 30px;
+        width: 60px;
+        font: 500 15px Arial;
+    }
+
+    button {
+        height: 30px;
+        width: 90px;
+    }
+
+    h2.heading {
+        text-decoration: underline;
+    }
+
+
+    #endCell {
+        font: 700 20px Arial;
+        color: red;
+    }
+
+
+
+</style> */
+/*# sourceMappingURL=style.css.map */

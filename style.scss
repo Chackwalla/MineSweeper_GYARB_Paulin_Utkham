@@ -1,11 +1,52 @@
 
 
+div{
+    box-sizing: border-box;
+}
 
+#allWrap{
+    width: max-content;
+}
 
+#playfield{
+    border: 2px solid black;
+    float: left;
+}
 
+.row{
+    width: 100%;
+}
 
+.cell{
+    height: 100%;
 
+    border: 1px solid black;
+    float: left;
 
+    background-color: blueviolet;
+
+    display: flex;
+    justify-content: center; /* align horizontal */
+/*        align-items: center; /* align vertical */
+}
+
+.button{
+    box-shadow: -1px -1px 7px rgba(0, 0, 0, 0.5) inset;
+    cursor: pointer;
+}
+
+.button:active{
+    background-color: coral;
+}
+
+.side{
+    width: auto;
+    height: max-content;
+    position: relative;
+    left: 30px;
+    top: 30px;
+    float: left;
+}
 
 
 
